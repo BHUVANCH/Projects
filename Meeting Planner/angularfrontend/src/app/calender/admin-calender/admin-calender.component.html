@@ -1,0 +1,166 @@
+<script src="socket.io.js"></script>
+<div class="calender">
+
+  <blockquote class="text-center">
+    <h2>Admin Calendar</h2>
+  </blockquote>
+  <a class="btn btn-warning pull-right" (click)="goBackToPreviousPage()">Go Back </a>
+  <ng-template #modalContent let-close="close">
+    <div class="modal-header">
+      <h5 class="modal-title" text-center>View and Edit Event</h5>
+      <button type="button" class="close" (click)="close()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div>
+        Admin:
+        <pre>{{ adminName }}</pre>
+      </div>
+      <div>
+        <span>Event Title: </span>
+          <input type="text" class="form-control" [(ngModel)]="modalData?.event.title" (keyup)="refresh.next()">
+        <span>Start Time: </span>
+        <div>
+          <input class="form-control" type="text" mwlFlatpickr [(ngModel)]="modalData?.event.start" (ngModelChange)="refresh.next()"
+            [altInput]="true" [convertModelValue]="true" [enableTime]="true" dateFormat="Y-m-dTH:i" altFormat="F j, Y H:i"
+            placeholder="Not set">
+        </div>
+        <span>End Time: </span>
+        <div>
+          <input class="form-control" type="text" mwlFlatpickr [(ngModel)]="modalData?.event.end" (ngModelChange)="refresh.next()"
+            [altInput]="true" [convertModelValue]="true" [enableTime]="true" dateFormat="Y-m-dTH:i" altFormat="F j, Y H:i"
+            placeholder="Not set">
+        </div>
+        <span>Location: </span>
+        <div>
+          <input type="text" class="form-control" [(ngModel)]="modalData?.event.location" (keyup)="refresh.next()">
+        </div>
+        <span>Purpose: </span>
+        <div>
+          <input type="text" class="form-control" [(ngModel)]="modalData?.event.message" (keyup)="refresh.next()">
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="row">
+        <div class="col">
+          <button type="button" class="btn btn-primary pull-right" (click)="updateEvents()">Update</button>
+        </div>
+        <div class="col">
+          <button class="btn btn-danger pull-left" (click)="events.splice(index, 1); refresh.next();">Delete</button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="row text-center">
+    <div class="col-md-4">
+      <div class="btn-group">
+        <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="activeDayIsOpen = false">
+          Previous
+        </div>
+        <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate">
+          Today
+        </div>
+        <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="activeDayIsOpen = false">
+          Next
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
+    </div>
+    <div class="col-md-4">
+      <div class="btn-group">
+        <div class="btn btn-primary" (click)="view = CalendarView.Month" [class.active]="view === CalendarView.Month">
+          Month
+        </div>
+        <div class="btn btn-primary" (click)="view = CalendarView.Week" [class.active]="view === CalendarView.Week">
+          Week
+        </div>
+        <div class="btn btn-primary" (click)="view = CalendarView.Day" [class.active]="view === CalendarView.Day">
+          Day
+        </div>
+      </div>
+    </div>
+  </div>
+  <br>
+  <div [ngSwitch]="view">
+    <mwl-calendar-month-view *ngSwitchCase="CalendarView.Month" [viewDate]="viewDate" [events]="events" [refresh]="refresh"
+      [activeDayIsOpen]="activeDayIsOpen" (dayClicked)="dayClicked($event.day)" (eventClicked)="handleEvent('Clicked', $event.event)"
+      (eventTimesChanged)="eventTimesChanged($event)">
+    </mwl-calendar-month-view>
+    <mwl-calendar-week-view *ngSwitchCase="CalendarView.Week" [viewDate]="viewDate" [events]="events" [refresh]="refresh"
+      (eventClicked)="handleEvent('Clicked', $event.event)" (eventTimesChanged)="eventTimesChanged($event)">
+    </mwl-calendar-week-view>
+    <mwl-calendar-day-view *ngSwitchCase="CalendarView.Day" [viewDate]="viewDate" [events]="events" [refresh]="refresh"
+      (eventClicked)="handleEvent('Clicked', $event.event)" (eventTimesChanged)="eventTimesChanged($event)">
+    </mwl-calendar-day-view>
+  </div>
+
+  <br><br><br>
+
+  <h3>
+    <button class="btn btn-danger " (click)="logout()">
+      Logout
+    </button>
+    <span> </span>
+    <button class="btn btn-primary pull-right" (click)="addEvent()" type="button" data-toggle="modal" data-target="#exampleModal">
+      Add new
+    </button>
+
+    <div class="modal fade" id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel"> Event:</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body form-group">
+            <div *ngIf="events[events.length - 1]">
+              <span>Title: </span>
+              <div>
+                <input type="text" class="form-control" [(ngModel)]="events[events.length - 1].title" (keyup)="refresh.next()">
+              </div>
+              <br>
+              <span>Start Time: </span>
+              <div>
+                <input class="form-control" type="text" mwlFlatpickr [(ngModel)]="events[events.length - 1].start" (ngModelChange)="refresh.next()"
+                  [altInput]="true" [convertModelValue]="true" [enableTime]="true" dateFormat="Y-m-dTH:i" altFormat="F j, Y H:i"
+                  placeholder="Not set">
+              </div>
+              <br>
+              <span>End Time: </span>
+              <div>
+                <input class="form-control" type="text" mwlFlatpickr [(ngModel)]="events[events.length - 1].end" (ngModelChange)="refresh.next()"
+                  [altInput]="true" [convertModelValue]="true" [enableTime]="true" dateFormat="Y-m-dTH:i" altFormat="F j, Y H:i"
+                  placeholder="Not set">
+              </div>
+              <br>
+              <span>Location: </span>
+              <div>
+                <input type="text" class="form-control" [(ngModel)]="events[events.length - 1].location" (keyup)="refresh.next()">
+              </div>
+              <br>
+              <span>Purpose: </span>
+              <div>
+                <input type="text" class="form-control" [(ngModel)]="events[events.length - 1].message" (keyup)="refresh.next()">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" (click)="addedEvent()">Save changes</button>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <div class="clearfix"></div>
+  </h3>
+  <div>

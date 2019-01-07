@@ -1,0 +1,159 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col displayNoneMobile col col people-list scrollable p-0" id="here">
+      <div class="p-2 typeOfChats">
+        Friends List:
+      </div>
+      <ul class="list friend">
+        <li class="clearfix cursorPointer" *ngFor="let user of shared">
+          <div class="userPresence" *ngIf="user.userEmail">
+            {{user.userEmail}}
+          </div>
+        </li>
+        <button class="btn btn-primary pull-right" data-target="#myModal" data-toggle="modal">
+          Share
+        </button>
+      </ul>
+    </div>
+
+
+    <!-- (click)="shareTaskList()" -->
+    <!-- hidden fields to store modal result in -->
+    <input type="hidden" [(ngModel)]="shareEmail" id="main-username">
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Enter the Email:
+            <input type="text" [(ngModel)]="shareEmail">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" (click)="shareTaskList()">Share</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal -->
+
+    <div class="col-12 col-sm-8 col-md-8 chat">
+      <!-- end chat-header -->
+
+      <!-- gettasksinList -->
+      <div class="chat-history">
+        <h3>
+          <button class="btn btn-danger " (click)="logout()">
+            Logout
+          </button>
+          <button class="btn btn-primary " (click)="saveChanges()">
+            saveChanges
+          </button>
+          <button class="btn btn-danger " (click)="undoList()">
+            Undo
+          </button>
+          <span> </span>
+
+          <h3>
+            Edit events
+            <button class="btn btn-primary pull-right" (click)="addTask()">
+              Add new
+            </button>
+            <div class="clearfix"></div>
+          </h3>
+          <div id="here">
+            <div *ngFor="let obj of taskList; let index = index">
+              <div class="card w-100">
+                <div class="card-body">
+                  <span>Title: </span>
+                  <input type="text" class="form-control" [(ngModel)]="obj.taskName">
+                  <span>Remainder: </span>
+                  <!-- <input class="form-control" type="datetime" [(ngModel)]="obj.remainder"> -->
+                  <!-- <label class="example-input-wrapper"> -->
+                  <input class="form-control" type="datetime" [(ngModel)]="obj.remainder" [owlDateTimeTrigger]="dt"
+                    [owlDateTime]="dt">
+                  <owl-date-time #dt></owl-date-time>
+                  <!-- </label> -->
+                  <span>Description: </span>
+                  <input type="text" class="form-control" [(ngModel)]="obj.description">
+                  <br>
+                  <label class="checkbox-inline">
+                    <input type="checkbox" name="favoriteColors" [(ngModel)]="obj.done"> Done
+                  </label>
+                  <button class="btn btn-danger pull-right" (click)="taskList.splice(index, 1)">Delete</button>
+                  <br><br>
+                  <button class="btn btn-primary pull-right" (click)="addInnerTask(obj)">
+                    Add Inner Events
+                  </button>
+                  <br> <br>
+                  <div class="row" *ngFor="let inner of obj.innerEvents; let index = index">
+                    <div class="col-6">
+                      <div class="card">
+                        <div class="card-body">
+                          <span>Title: </span>
+                          <!-- <h5 class="card-title">{{message.taskName}}</h5> -->
+                          <input type="text" class="form-control" [(ngModel)]="inner.taskName">
+                          <!-- <p class="card-text">{{message.remainder}}</p> -->
+                          <span>Remainder: </span>
+                          <!-- <input class="form-control" type="text" mwlFlatpickr [(ngModel)]="inner.remainder"> -->
+                          <input class="form-control" type="datetime" [(ngModel)]="inner.remainder"
+                            [owlDateTimeTrigger]="dt" [owlDateTime]="dt">
+                          <owl-date-time #dt></owl-date-time>
+                          <!-- <p class="card-text">{{message.description}}</p> -->
+                          <span>Description: </span>
+                          <input type="text" class="form-control" [(ngModel)]="inner.description">
+                          <br>
+                          <label class="checkbox-inline">
+                            <input type="checkbox" name="favoriteColors" [(ngModel)]="inner.done"> Done
+                          </label>
+                          <button class="btn btn-danger pull-right" (click)="obj.innerEvents.splice(index, 1);">Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                    <br>
+                    <br>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- end container -->
+
+
+          <button type="hidden" id="dynamic" class="btn btn-info btn-lg dynamicModal" (click)="openModal()" data-toggle="modal"
+            data-target="#exampleModal">click to open</button>
+
+          <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Share Alert</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <p>{{inviteshare}} {{ilistName}}</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">dismiss</button>
+                  <button type="button" class="btn btn-primary" data-dismiss="modal" (click)='accept(inviteshare)'>Accept</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+          <div>
+          </div>
+          <script src="socket.io.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+            crossorigin="anonymous"></script>

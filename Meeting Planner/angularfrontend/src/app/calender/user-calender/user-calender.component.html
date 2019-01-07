@@ -1,0 +1,122 @@
+<script src="socket.io.js"></script>
+<div class="calender">
+
+  <blockquote class="blockquote text-center">
+    <h2>User Calendar</h2>
+  </blockquote>
+  <a class="btn btn-danger pull-right" (click)="logout()">logout </a>
+  <ng-template #modalContent let-close="close">
+    <div class="modal-header">
+      <h5 class="modal-title">View Event</h5>
+      <button type="button" class="close" (click)="close()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div>
+        Admin:
+        <pre>{{ modalData?.event.adminName }}</pre>
+      </div>
+      <div>
+        Event:
+        <span>Title: </span>
+        <div>
+          <pre>{{modalData?.event.title}}</pre>
+        </div>
+        <br>
+        <span>Start Time: </span>
+        <div>
+          <pre>{{modalData?.event.start | date:'medium' }}</pre>
+        </div>
+        <span>End Time: </span>
+        <div>
+          <pre>{{modalData?.event.end | date:'medium' }}</pre>
+        </div>
+        <br>
+        <span>Location: </span>
+        <div>
+          <pre>{{modalData?.event.location}}</pre>
+        </div>
+        <br>
+        <span>Purpose: </span>
+        <div>
+          <pre>{{modalData?.event.message}}</pre>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="close()">OK</button>
+    </div>
+  </ng-template>
+
+  <div class="row text-center">
+    <div class="col-md-4">
+      <div class="btn-group">
+        <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="activeDayIsOpen = false">
+          Previous
+        </div>
+        <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate">
+          Today
+        </div>
+        <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="activeDayIsOpen = false">
+          Next
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
+    </div>
+    <div class="col-md-4">
+      <div class="btn-group">
+        <div class="btn btn-primary" (click)="view = CalendarView.Month" [class.active]="view === CalendarView.Month">
+          Month
+        </div>
+        <div class="btn btn-primary" (click)="view = CalendarView.Week" [class.active]="view === CalendarView.Week">
+          Week
+        </div>
+        <div class="btn btn-primary" (click)="view = CalendarView.Day" [class.active]="view === CalendarView.Day">
+          Day
+        </div>
+      </div>
+    </div>
+  </div>
+  <br>
+  <div id="here" [ngSwitch]="view">
+    <mwl-calendar-month-view *ngSwitchCase="CalendarView.Month" [viewDate]="viewDate" [events]="events" [refresh]="refresh"
+      [activeDayIsOpen]="activeDayIsOpen" (dayClicked)="dayClicked($event.day)" (eventClicked)="handleEvent('Clicked', $event.event)"
+      (eventTimesChanged)="eventTimesChanged($event)">
+    </mwl-calendar-month-view>
+    <mwl-calendar-week-view *ngSwitchCase="CalendarView.Week" [viewDate]="viewDate" [events]="events" [refresh]="refresh"
+      (eventClicked)="handleEvent('Clicked', $event.event)" (eventTimesChanged)="eventTimesChanged($event)">
+    </mwl-calendar-week-view>
+    <mwl-calendar-day-view *ngSwitchCase="CalendarView.Day" [viewDate]="viewDate" [events]="events" [refresh]="refresh"
+      (eventClicked)="handleEvent('Clicked', $event.event)" (eventTimesChanged)="eventTimesChanged($event)">
+    </mwl-calendar-day-view>
+  </div>
+
+  <button type="button" id= "dynamic" class="btn btn-info btn-lg dynamicModal" (click)="openModal()" data-toggle="modal" data-target="#exampleModal">click to open</button>
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Meeting Alert</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Meeting with {{adminmeeting}} at {{startMeeting | date:'medium'}}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">dismiss</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="snoozeMeeting()">Snooze</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <br><br><br>
+</div>
